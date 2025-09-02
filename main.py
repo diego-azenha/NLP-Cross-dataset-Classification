@@ -1,4 +1,3 @@
-# main.py
 from pathlib import Path
 import json, warnings
 import numpy as np, pandas as pd
@@ -89,8 +88,8 @@ def read_yelp():
 
 # Function to define the model pipeline (TF-IDF + Logistic Regression)
 def model():
-    return Pipeline([
-        ("tfidf", TfidfVectorizer(strip_accents="unicode", lowercase=True,
+    return Pipeline([ 
+        ("tfidf", TfidfVectorizer(strip_accents="unicode", lowercase=True, 
                                   ngram_range=(1,2), min_df=2, max_features=100_000)),  # TF-IDF vectorizer
         ("clf", LogisticRegression(solver="liblinear", C=1.0, max_iter=1000, random_state=42))  # Logistic Regression classifier
     ])
@@ -103,6 +102,9 @@ def run(Xtr, ytr, Xte, yte, trn, tst):
     return {"train_on": trn, "test_on": tst, "n_train": len(Xtr), "n_test": len(Xte), "accuracy": float(acc)}
 
 # Function to plot the results
+import pandas as pd
+import matplotlib.pyplot as plt
+
 def plot(df):
     # Create a new column 'setup' to represent the combination of train_on and test_on
     df['setup'] = df['train_on'] + " → " + df['test_on']
@@ -110,12 +112,11 @@ def plot(df):
     # Custom order for the experiments
     order = ["IMDB→IMDB", "Yelp→Yelp", "IMDB→Yelp", "Yelp→IMDB"]
     
-    # Filter the DataFrame to include only the defined setups and sort based on the 'setup' column
-    df = df[df['setup'].isin(order)]  # Filter to include only the defined setups
+    # Sort the DataFrame based on the defined custom order
     df = df.sort_values(by='setup', key=lambda x: pd.Categorical(x, categories=order, ordered=True))  # Sort based on the custom order
 
     # Create the plot
-    plt.figure(figsize=(8.5, 6))  # Create a figure for the plot
+    plt.figure(figsize=(10, 6))  # Adjust the figure size to fit labels properly
     bars = plt.bar(df["setup"], df["accuracy"], color='royalblue')  # Create bars for each experiment result
     plt.ylim(0, 1)  # Set the y-axis limit
     plt.ylabel("Accuracy")
@@ -126,11 +127,8 @@ def plot(df):
     for b, v in zip(bars, df["accuracy"]):
         plt.text(b.get_x() + b.get_width() / 2, v + 0.01, f"{v:.3f}", ha="center", va="bottom", fontsize=9)
     
-    # Add a caption for the plot
-    caption = ("Bars show test accuracy. Same-dataset: IMDB→IMDB, Yelp→Yelp. "
-               "Cross-dataset: IMDB→Yelp, Yelp→IMDB. Yelp labels: stars≥4 positive; ≤2 negative (3 dropped).")
-    plt.gcf().text(0.5, -0.08, caption, ha="center", va="top", fontsize=9, wrap=True)
-    plt.tight_layout()  # Adjust layout
+    # Adjust layout to ensure the labels are not cut off
+    plt.tight_layout()
     plt.savefig(OUTDIR / "cross_domain_results.png", bbox_inches="tight")  # Save the plot as PNG
     plt.close()  # Close the plot
 
