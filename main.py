@@ -125,7 +125,7 @@ def plot(df):
                "Cross-dataset: IMDB→Yelp, Yelp→IMDB. Yelp labels: stars≥4 positive; ≤2 negative (3 dropped).")
     plt.gcf().text(0.5, -0.08, caption, ha="center", va="top", fontsize=9, wrap=True)
     plt.tight_layout()  # Adjust layout
-    plt.savefig(OUTDIR / "cross_domain_results.pdf", bbox_inches="tight")  # Save the plot
+    plt.savefig(OUTDIR / "cross_domain_results.png", bbox_inches="tight")  # Save the plot as PNG
     plt.close()  # Close the plot
 
 # Main function to run the challenges
