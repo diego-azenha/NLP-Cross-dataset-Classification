@@ -48,7 +48,7 @@ def _read_json_lines(fp: Path) -> pd.DataFrame:
             if rows: return pd.DataFrame(rows)
         except json.JSONDecodeError:
             pass
-    # Try reading as a full JSON array
+    # Attempt to read as a complete JSON array
     for enc in ("utf-8", "utf-8-sig"):
         try:
             with open(fp, "r", encoding=enc) as f:
@@ -104,11 +104,17 @@ def run(Xtr, ytr, Xte, yte, trn, tst):
 
 # Function to plot the results
 def plot(df):
-    df = df.assign(setup=df["train_on"] + " → " + df["test_on"])  # Create a new column for the experiment setup
-    order = ["IMDB→IMDB", "Yelp→Yelp", "IMDB→Yelp", "Yelp→IMDB"]  # Define custom order for the experiments
+    # Create a new column 'setup' to represent the combination of train_on and test_on
+    df['setup'] = df['train_on'] + " → " + df['test_on']
     
-    df = df.set_index("setup").loc[order].reset_index()  # Sort the dataframe
+    # Custom order for the experiments
+    order = ["IMDB→IMDB", "Yelp→Yelp", "IMDB→Yelp", "Yelp→IMDB"]
     
+    # Filter the DataFrame to include only the defined setups and sort based on the 'setup' column
+    df = df[df['setup'].isin(order)]  # Filter to include only the defined setups
+    df = df.sort_values(by='setup', key=lambda x: pd.Categorical(x, categories=order, ordered=True))  # Sort based on the custom order
+
+    # Create the plot
     plt.figure(figsize=(8.5, 6))  # Create a figure for the plot
     bars = plt.bar(df["setup"], df["accuracy"], color='royalblue')  # Create bars for each experiment result
     plt.ylim(0, 1)  # Set the y-axis limit
